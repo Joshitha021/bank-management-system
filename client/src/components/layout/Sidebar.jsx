@@ -4,7 +4,7 @@ import { useContext } from 'react';
 import { AuthContext } from '../../context/AuthContext';
 import './Layout.css';
 
-export default function Sidebar() {
+export default function Sidebar({ isSidebarOpen, setIsSidebarOpen }) {
   const { logout } = useContext(AuthContext);
   const navigate = useNavigate();
 
@@ -22,7 +22,7 @@ export default function Sidebar() {
   ];
 
   return (
-    <div className="sidebar">
+    <div className={`sidebar ${isSidebarOpen ? 'open' : ''}`}>
       <div className="sidebar-logo">
         <div className="logo-icon">🏦</div>
         <h2>BankHub</h2>
@@ -35,6 +35,7 @@ export default function Sidebar() {
               <NavLink 
                 to={item.path} 
                 className={({isActive}) => isActive ? 'nav-item active' : 'nav-item'}
+                onClick={() => setIsSidebarOpen(false)}
               >
                 {item.icon}
                 <span>{item.label}</span>
@@ -45,7 +46,7 @@ export default function Sidebar() {
       </nav>
 
       <div className="sidebar-bottom">
-        <NavLink to="/settings" className={({isActive}) => isActive ? 'nav-item active' : 'nav-item'}>
+        <NavLink to="/settings" className={({isActive}) => isActive ? 'nav-item active' : 'nav-item'} onClick={() => setIsSidebarOpen(false)}>
           <Settings size={20} />
           <span>Settings</span>
         </NavLink>

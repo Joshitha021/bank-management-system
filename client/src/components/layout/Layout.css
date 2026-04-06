@@ -215,3 +215,64 @@
   flex: 1;
   padding: 2rem;
 }
+
+/* Mobile Responsive Adjustments */
+.topbar-left {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+}
+
+.mobile-menu-btn {
+  display: none; /* Hidden by default on desktop */
+}
+
+.sidebar-overlay {
+  display: none;
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: rgba(0, 0, 0, 0.5);
+  backdrop-filter: blur(2px);
+  z-index: 95;
+}
+
+@media (max-width: 1024px) {
+  .main-content {
+    padding: 1rem;
+  }
+}
+
+@media (max-width: 768px) {
+  .mobile-menu-btn {
+    display: flex;
+  }
+
+  .sidebar {
+    transform: translateX(-100%);
+    transition: transform 0.3s ease-in-out;
+    box-shadow: var(--shadow-lg);
+  }
+
+  .sidebar.open {
+    transform: translateX(0);
+  }
+
+  .sidebar-overlay {
+    display: block; /* Shown only when sidebar is open because of conditional render in React */
+  }
+
+  .main-content-wrapper {
+    margin-left: 0;
+  }
+
+  .search-bar {
+    display: none; /* Hide wide search bar on very small screens */
+  }
+
+  .topbar {
+    padding: 0 1rem;
+  }
+}

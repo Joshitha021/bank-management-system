@@ -97,3 +97,29 @@ exports.getProfile = async (req, res) => {
     res.status(500).json({ success: false, message: 'Server error' });
   }
 };
+
+// Update user profile
+exports.updateProfile = async (req, res) => {
+  try {
+    const { name, phone, avatar, notificationsEnabled, theme } = req.body;
+    
+    // Build update object dynamically
+    const updateFields = {};
+    if (name !== undefined) updateFields.name = name;
+    if (phone !== undefined) updateFields.phone = phone;
+    if (avatar !== undefined) updateFields.avatar = avatar;
+    if (notificationsEnabled !== undefined) updateFields.notificationsEnabled = notificationsEnabled;
+    if (theme !== undefined) updateFields.theme = theme;
+
+    const user = await User.findByIdAndUpdate(
+      req.user.id,
+      { $set: updateFields },
+      { new: true }
+    ).select('-password');
+
+    res.json({ success: true, user });
+  } catch (err) {
+    console.error(err.message);
+    res.status(500).json({ success: false, message: 'Server error' });
+  }
+};
