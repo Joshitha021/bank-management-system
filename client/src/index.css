@@ -22,9 +22,9 @@
 
   /* Backgrounds & Surfaces */
   --color-bg: #0b1120;
-  --color-surface: #1e293b;
-  --color-surface-hover: #334155;
-  --color-border: rgba(255, 255, 255, 0.1);
+  --color-surface: rgba(30, 41, 59, 0.65);
+  --color-surface-hover: rgba(51, 65, 85, 0.75);
+  --color-border: rgba(255, 255, 255, 0.08);
 
   /* Gradients */
   --gradient-primary: linear-gradient(135deg, var(--color-primary) 0%, var(--color-primary-dark) 100%);
@@ -55,9 +55,9 @@ body.light-mode {
   --color-text-inverse: #ffffff;
 
   --color-bg: #f1f5f9;
-  --color-surface: #ffffff;
-  --color-surface-hover: #f8fafc;
-  --color-border: #e2e8f0;
+  --color-surface: rgba(255, 255, 255, 0.75);
+  --color-surface-hover: rgba(248, 250, 252, 0.9);
+  --color-border: rgba(0, 0, 0, 0.05);
 
   --gradient-card: linear-gradient(145deg, #ffffff 0%, #f1f5f9 100%);
   --shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
@@ -143,17 +143,20 @@ button {
 
 .card {
   background: var(--color-surface);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
   border: 1px solid var(--color-border);
   border-radius: 16px;
   padding: 1.5rem;
   box-shadow: var(--shadow-md);
-  transition: transform 0.3s ease, box-shadow 0.3s ease;
+  transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
 }
 
 .card:hover {
-  transform: translateY(-4px);
-  box-shadow: var(--shadow-lg);
-  border-color: rgba(212, 175, 55, 0.3);
+  transform: translateY(-6px) scale(1.01);
+  box-shadow: 0 15px 30px -5px rgba(0, 0, 0, 0.4), 0 0 20px rgba(212, 175, 55, 0.15);
+  border-color: rgba(212, 175, 55, 0.4);
+  z-index: 10;
 }
 
 .input-field {
@@ -179,5 +182,6 @@ button {
 .text-gradient {
   background: var(--gradient-accent);
   -webkit-background-clip: text;
+  background-clip: text;
   -webkit-text-fill-color: transparent;
 }
