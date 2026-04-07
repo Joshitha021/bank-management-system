@@ -35,3 +35,32 @@ exports.getUsers = async (req, res) => {
     res.status(500).json({ success: false, message: 'Server error' });
   }
 };
+
+// Update user details
+exports.updateUser = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const { name, email, role } = req.body;
+
+    const user = await User.findById(id);
+    if (!user) {
+      return res.status(404).json({ success: false, message: 'User not found' });
+    }
+
+    if (name) user.name = name;
+    if (email) user.email = email;
+    if (role) user.role = role;
+
+    await user.save();
+    
+    // Return the updated user without the password field
+    const updatedUser = await User.findById(id).select('-password');
+    res.json({ success: true, user: updatedUser });
+  } catch (err) {
+    if (err.kind === 'ObjectId') {
+      return res.status(404).json({ success: false, message: 'User not found' });
+    }
+    console.error('Admin updateUser error:', err.message);
+    res.status(500).json({ success: false, message: 'Server error' });
+  }
+};
