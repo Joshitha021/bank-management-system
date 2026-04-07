@@ -64,7 +64,7 @@ export default function DashboardPage() {
         <div className="card" style={{ gridColumn: 'span 12', '@media (min-width: 1024px)': { gridColumn: 'span 4' } }}>
           <h3 className="text-muted" style={{ fontSize: '1rem', marginBottom: '0.5rem' }}>Total Balance</h3>
           <h2 style={{ fontSize: '2.5rem', marginBottom: '1.5rem', color: 'var(--color-accent)' }}>
-            ${totalBalance.toLocaleString('en-US', { minimumFractionDigits: 2 })}
+            ₹{totalBalance.toLocaleString('en-US', { minimumFractionDigits: 2 })}
           </h2>
           <div style={{ display: 'flex', gap: '1rem' }}>
             <Link to="/transactions" className="btn-primary" style={{ flex: 1, textAlign: 'center' }}>Send</Link>
@@ -90,7 +90,7 @@ export default function DashboardPage() {
                       <div style={{ fontSize: '0.75rem' }} className="text-muted">**** {acc.accountNumber.slice(-4)}</div>
                     </div>
                   </div>
-                  <div style={{ fontWeight: 600 }}>${acc.balance.toLocaleString()}</div>
+                  <div style={{ fontWeight: 600 }}>₹{acc.balance.toLocaleString()}</div>
                 </div>
               ))}
             </div>
@@ -163,7 +163,7 @@ export default function DashboardPage() {
                     </div>
                   </div>
                   <div style={{ fontWeight: 600, color: tx.amount < 0 ? 'var(--color-text-main)' : 'var(--color-success)' }}>
-                    {tx.amount > 0 ? '+' : ''}${Math.abs(tx.amount).toLocaleString('en-US', { minimumFractionDigits: 2 })}
+                    {tx.amount > 0 ? '+' : ''}₹{Math.abs(tx.amount).toLocaleString('en-US', { minimumFractionDigits: 2 })}
                   </div>
                 </div>
               ))}

@@ -29,7 +29,8 @@ exports.register = async (req, res) => {
     // Create token
     const payload = {
       user: {
-        id: user.id
+        id: user.id,
+        role: user.role
       }
     };
 
@@ -39,7 +40,7 @@ exports.register = async (req, res) => {
       { expiresIn: '5d' },
       (err, token) => {
         if (err) throw err;
-        res.status(201).json({ success: true, token, user: { id: user.id, name: user.name, email: user.email } });
+        res.status(201).json({ success: true, token, user: { id: user.id, name: user.name, email: user.email, role: user.role } });
       }
     );
   } catch (err) {
@@ -68,7 +69,8 @@ exports.login = async (req, res) => {
     // Create token
     const payload = {
       user: {
-        id: user.id
+        id: user.id,
+        role: user.role
       }
     };
 
@@ -78,7 +80,7 @@ exports.login = async (req, res) => {
       { expiresIn: '5d' },
       (err, token) => {
         if (err) throw err;
-        res.status(200).json({ success: true, token, user: { id: user.id, name: user.name, email: user.email } });
+        res.status(200).json({ success: true, token, user: { id: user.id, name: user.name, email: user.email, role: user.role } });
       }
     );
   } catch (err) {

@@ -55,8 +55,8 @@ export default function LoansPage() {
               
               <div className="form-group">
                 <div style={{ display: 'flex', justifyContent: 'space-between' }}>
-                  <label>Loan Amount ($)</label>
-                  <span>${amount.toLocaleString()}</span>
+                  <label>Loan Amount (₹)</label>
+                  <span>₹{amount.toLocaleString()}</span>
                 </div>
                 <input 
                   type="range" 
@@ -105,18 +105,18 @@ export default function LoansPage() {
                 <div style={{ textAlign: 'center', marginBottom: '1.5rem' }}>
                   <div className="text-muted" style={{ fontSize: '0.875rem' }}>Monthly EMI</div>
                   <div style={{ fontSize: '2.5rem', fontWeight: 700, color: 'var(--color-accent)' }}>
-                    ${emi.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+                    ₹{emi.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
                   </div>
                 </div>
                 
                 <div style={{ display: 'flex', justifyContent: 'space-between', borderTop: '1px solid var(--color-border)', paddingTop: '1rem' }}>
                   <div style={{ textAlign: 'center', flex: 1 }}>
                     <div className="text-muted" style={{ fontSize: '0.75rem' }}>Total Interest</div>
-                    <div style={{ fontWeight: 600 }}>${totalInterest.toLocaleString('en-US', { maximumFractionDigits: 0 })}</div>
+                    <div style={{ fontWeight: 600 }}>₹{totalInterest.toLocaleString('en-US', { maximumFractionDigits: 0 })}</div>
                   </div>
                   <div style={{ textAlign: 'center', flex: 1, borderLeft: '1px solid var(--color-border)' }}>
                     <div className="text-muted" style={{ fontSize: '0.75rem' }}>Total Payment</div>
-                    <div style={{ fontWeight: 600 }}>${totalPayment.toLocaleString('en-US', { maximumFractionDigits: 0 })}</div>
+                    <div style={{ fontWeight: 600 }}>₹{totalPayment.toLocaleString('en-US', { maximumFractionDigits: 0 })}</div>
                   </div>
                 </div>
               </div>

@@ -17,7 +17,7 @@ exports.getTransactions = async (req, res) => {
 // Perform a transfer between own accounts or to an external account number
 exports.createTransfer = async (req, res) => {
   try {
-    const { fromAccountId, toAccountNumber, amount, description, category } = req.body;
+    const { fromAccountId, toAccountNumber, amount, description, category, otp } = req.body;
 
     if (!amount || amount <= 0) {
       return res.status(400).json({ success: false, message: 'Invalid amount' });
@@ -31,6 +31,51 @@ exports.createTransfer = async (req, res) => {
 
     if (fromAccount.balance < amount) {
       return res.status(400).json({ success: false, message: 'Insufficient funds' });
+    }
+
+    // 2. 2FA Check for High Value Transfers (> ₹10,000)
+    if (amount > 10000) {
+      const Otp = require('../models/Otp');
+      if (!otp) {
+        // Generate OTP
+        const code = Math.floor(100000 + Math.random() * 900000).toString();
+        
+        // Clear existing unresolved OTPs
+        await Otp.deleteMany({ userId: req.user.id, action: 'HighValueTransfer' });
+        
+        // Save new OTP
+        const newOtp = new Otp({
+          userId: req.user.id,
+          code,
+          expiresAt: new Date(Date.now() + 5 * 60000), // 5 minutes
+          action: 'HighValueTransfer'
+        });
+        await newOtp.save();
+
+        // Send Email
+        const User = require('../models/User');
+        const user = await User.findById(req.user.id);
+        const sendEmail = require('../utils/emailUtils');
+        await sendEmail({
+          email: user.email,
+          subject: 'Action Required: High Value Transfer OTP',
+          message: `Your One-Time Password for the transfer of ₹${amount.toLocaleString()} is: ${code}. It expires in 5 minutes.`
+        });
+
+        return res.status(202).json({ 
+          success: false, 
+          requireOTP: true, 
+          message: 'An OTP has been sent to your registered email.' 
+        });
+      } else {
+        // Verify OTP
+        const validOtp = await Otp.findOne({ userId: req.user.id, action: 'HighValueTransfer', code: otp });
+        if (!validOtp) {
+          return res.status(400).json({ success: false, message: 'Invalid or expired OTP' });
+        }
+        // OTP valid, delete it
+        await Otp.deleteOne({ _id: validOtp._id });
+      }
     }
 
     // 2. Determine To Account (Internal or External)

@@ -160,7 +160,7 @@ export default function CardsPage() {
                 <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
                   <div>
                     <div style={{ fontSize: '0.875rem', color: 'var(--color-text-muted)' }}>Daily Limit</div>
-                    <div style={{ fontWeight: 'bold' }}>${card.limit.toLocaleString()}</div>
+                    <div style={{ fontWeight: 'bold' }}>₹{card.limit.toLocaleString()}</div>
                   </div>
                   <div style={{ display: 'flex', gap: '0.5rem' }}>
                     <button 

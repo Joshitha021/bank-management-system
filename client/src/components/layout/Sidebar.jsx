@@ -5,7 +5,7 @@ import { AuthContext } from '../../context/AuthContext';
 import './Layout.css';
 
 export default function Sidebar({ isSidebarOpen, setIsSidebarOpen }) {
-  const { logout } = useContext(AuthContext);
+  const { user, logout } = useContext(AuthContext);
   const navigate = useNavigate();
 
   const handleLogout = () => {
@@ -13,13 +13,23 @@ export default function Sidebar({ isSidebarOpen, setIsSidebarOpen }) {
     navigate('/login');
   };
 
-  const menuItems = [
-    { icon: <LayoutGrid size={20} />, label: 'Dashboard', path: '/dashboard' },
-    { icon: <Wallet size={20} />, label: 'Accounts', path: '/accounts' },
-    { icon: <Send size={20} />, label: 'Transactions', path: '/transactions' },
-    { icon: <CreditCard size={20} />, label: 'Cards', path: '/cards' },
-    { icon: <FileText size={20} />, label: 'Loans', path: '/loans' },
-  ];
+  let menuItems = [];
+
+  if (user?.role === 'Admin') {
+    menuItems = [
+      { icon: <LayoutGrid size={20} />, label: 'Admin Dashboard', path: '/admin' },
+      { icon: <Wallet size={20} />, label: 'Manage Accounts', path: '#! (Coming Phase 10)' },
+      { icon: <Send size={20} />, label: 'System Health', path: '#! (Coming Phase 9)' },
+    ];
+  } else {
+    menuItems = [
+      { icon: <LayoutGrid size={20} />, label: 'Dashboard', path: '/dashboard' },
+      { icon: <Wallet size={20} />, label: 'Accounts', path: '/accounts' },
+      { icon: <Send size={20} />, label: 'Transactions', path: '/transactions' },
+      { icon: <CreditCard size={20} />, label: 'Cards', path: '/cards' },
+      { icon: <FileText size={20} />, label: 'Loans', path: '/loans' },
+    ];
+  }
 
   return (
     <div className={`sidebar ${isSidebarOpen ? 'open' : ''}`}>

@@ -26,6 +26,9 @@ app.use('/api/accounts', require('./routes/accountRoutes'));
 app.use('/api/cards', require('./routes/cardRoutes'));
 app.use('/api/transactions', require('./routes/transactionRoutes'));
 
+// Admin Routes
+app.use('/api/admin', require('./routes/adminRoutes'));
+
 // Test Route
 app.get('/api/test', (req, res) => {
   res.json({ success: true, message: 'Backend is running!' });

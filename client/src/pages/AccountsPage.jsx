@@ -80,16 +80,16 @@ export default function AccountsPage() {
               <div>
                 <p className="text-muted" style={{ fontSize: '0.875rem', marginBottom: '0.25rem' }}>Available Balance</p>
                 <h2 style={{ fontSize: '2rem', marginBottom: '1.5rem' }}>
-                  ${acc.balance.toLocaleString('en-US', { minimumFractionDigits: 2 })}
+                  ₹{acc.balance.toLocaleString('en-US', { minimumFractionDigits: 2 })}
                 </h2>
               </div>
               
               <div style={{ display: 'flex', gap: '1rem', borderTop: '1px solid var(--color-border)', paddingTop: '1rem' }}>
                 <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', color: 'var(--color-success)', fontSize: '0.875rem' }}>
-                  <TrendingUp size={16} /> <span className="text-muted">In: $0.00</span>
+                  <TrendingUp size={16} /> <span className="text-muted">In: ₹0.00</span>
                 </div>
                 <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', color: 'var(--color-danger)', fontSize: '0.875rem' }}>
-                  <TrendingDown size={16} /> <span className="text-muted">Out: $0.00</span>
+                  <TrendingDown size={16} /> <span className="text-muted">Out: ₹0.00</span>
                 </div>
               </div>
             </motion.div>

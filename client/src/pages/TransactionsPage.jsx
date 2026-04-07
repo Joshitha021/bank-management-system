@@ -15,6 +15,8 @@ export default function TransactionsPage() {
   const [desc, setDesc] = useState('');
   const [transferError, setTransferError] = useState('');
   const [transferSuccess, setTransferSuccess] = useState('');
+  const [showOtpModal, setShowOtpModal] = useState(false);
+  const [otp, setOtp] = useState('');
 
   useEffect(() => {
     fetchData();
@@ -44,16 +46,31 @@ export default function TransactionsPage() {
     setTransferSuccess('');
 
     try {
-      await axios.post('http://localhost:5000/api/transactions/transfer', {
+      const payload = {
         fromAccountId: fromAccount,
         toAccountNumber: toAccountLabel,
         amount: Number(amount),
         description: desc || 'Fund Transfer'
-      });
+      };
+      
+      if (showOtpModal) {
+        payload.otp = otp;
+      }
+
+      const res = await axios.post('http://localhost:5000/api/transactions/transfer', payload);
+      
+      if (res.status === 202 && res.data.requireOTP) {
+        setShowOtpModal(true);
+        setTransferSuccess(res.data.message);
+        return;
+      }
+
       setTransferSuccess('Transfer completed successfully!');
       setAmount('');
       setToAccountLabel('');
       setDesc('');
+      setShowOtpModal(false);
+      setOtp('');
       fetchData(); // refresh list
     } catch (err) {
       setTransferError(err.response?.data?.message || 'Transfer failed. Check details.');
@@ -92,7 +109,7 @@ export default function TransactionsPage() {
                 >
                   {accounts.map(acc => (
                     <option key={acc._id} value={acc._id}>
-                      {acc.type} - **** {acc.accountNumber.slice(-4)} (${acc.balance})
+                      {acc.type} - **** {acc.accountNumber.slice(-4)} (₹{acc.balance})
                     </option>
                   ))}
                 </select>
@@ -111,7 +128,7 @@ export default function TransactionsPage() {
               </div>
 
               <div className="form-group">
-                <label>Amount (USD)</label>
+                <label>Amount (₹)</label>
                 <input 
                   type="number" 
                   className="input-field" 
@@ -120,6 +137,7 @@ export default function TransactionsPage() {
                   step="0.01"
                   value={amount}
                   onChange={e => setAmount(e.target.value)}
+                  disabled={showOtpModal}
                   required
                 />
               </div>
@@ -131,13 +149,40 @@ export default function TransactionsPage() {
                   className="input-field" 
                   placeholder="e.g. Rent payment"
                   value={desc}
+                  disabled={showOtpModal}
                   onChange={e => setDesc(e.target.value)}
                 />
               </div>
 
-              <button type="submit" className="btn-primary" style={{ marginTop: '0.5rem' }}>
-                Confirm Transfer
-              </button>
+              {showOtpModal && (
+                <motion.div initial={{ opacity: 0, y: -10 }} animate={{ opacity: 1, y: 0 }} className="form-group" style={{ padding: '1rem', background: 'rgba(212, 175, 55, 0.1)', border: '1px solid var(--color-accent)', borderRadius: '8px' }}>
+                  <label style={{ color: 'var(--color-accent)' }}>Enter 6-Digit OTP</label>
+                  <input 
+                    type="text" 
+                    className="input-field" 
+                    placeholder="123456"
+                    value={otp}
+                    onChange={e => setOtp(e.target.value)}
+                    required
+                    maxLength="6"
+                    style={{ letterSpacing: '0.5rem', textAlign: 'center', fontSize: '1.25rem', fontWeight: 'bold' }}
+                  />
+                  <div style={{ display: 'flex', gap: '0.5rem', marginTop: '1rem' }}>
+                    <button type="button" onClick={() => { setShowOtpModal(false); setOtp(''); setTransferSuccess(''); }} className="btn-primary" style={{ flex: 1, background: 'transparent', border: '1px solid var(--color-border)', color: 'var(--color-text-main)', boxShadow: 'none' }}>
+                      Cancel
+                    </button>
+                    <button type="submit" className="btn-primary" style={{ flex: 1 }}>
+                      Verify & Send
+                    </button>
+                  </div>
+                </motion.div>
+              )}
+
+              {!showOtpModal && (
+                <button type="submit" className="btn-primary" style={{ marginTop: '0.5rem' }}>
+                  Confirm Transfer
+                </button>
+              )}
             </form>
           </div>
         </div>
@@ -175,7 +220,7 @@ export default function TransactionsPage() {
                     </div>
                     <div style={{ textAlign: 'right' }}>
                       <div style={{ fontWeight: 700, fontSize: '1.1rem', color: tx.amount < 0 ? 'var(--color-text-main)' : 'var(--color-success)' }}>
-                        {tx.amount > 0 ? '+' : ''}${Math.abs(tx.amount).toLocaleString('en-US', { minimumFractionDigits: 2 })}
+                        {tx.amount > 0 ? '+' : ''}₹{Math.abs(tx.amount).toLocaleString('en-US', { minimumFractionDigits: 2 })}
                       </div>
                       <div style={{ fontSize: '0.75rem', color: 'var(--color-text-muted)' }}>
                         {tx.status}

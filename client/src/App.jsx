@@ -9,6 +9,7 @@ import DashboardPage from './pages/DashboardPage';
 import TransactionsPage from './pages/TransactionsPage';
 import LoansPage from './pages/LoansPage';
 import SettingsPage from './pages/SettingsPage';
+import AdminPage from './pages/AdminPage';
 
 function App() {
   return (
@@ -27,6 +28,7 @@ function App() {
             <Route path="cards" element={<CardsPage />} />
             <Route path="loans" element={<LoansPage />} />
             <Route path="settings" element={<SettingsPage />} />
+            <Route path="admin" element={<AdminPage />} />
             {/* Default fallback inside layout */}
             <Route path="*" element={<Navigate to="/dashboard" replace />} />
           </Route>

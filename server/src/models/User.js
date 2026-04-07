@@ -40,6 +40,11 @@ const userSchema = new mongoose.Schema({
   notificationsEnabled: {
     type: Boolean,
     default: true
+  },
+  role: {
+    type: String,
+    enum: ['User', 'Admin'],
+    default: 'User'
   }
 }, { timestamps: true });
 
