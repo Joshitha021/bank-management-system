@@ -13,6 +13,9 @@ app.use(cors({
   credentials: true
 }));
 
+const path = require('path');
+app.use('/uploads', express.static(path.join(__dirname, '../uploads')));
+
 // Connect to MongoDB
 mongoose.connect(process.env.MONGODB_URI || 'mongodb://localhost:27017/bank-system')
   .then(() => console.log('✓ MongoDB connected'))
@@ -28,6 +31,12 @@ app.use('/api/transactions', require('./routes/transactionRoutes'));
 
 // Admin Routes
 app.use('/api/admin', require('./routes/adminRoutes'));
+
+// KYC Route
+app.use('/api/kyc', require('./routes/kycRoutes'));
+
+// Payees Route
+app.use('/api/payees', require('./routes/payeeRoutes'));
 
 // Test Route
 app.get('/api/test', (req, res) => {

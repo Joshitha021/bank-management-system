@@ -2,13 +2,14 @@ import { useState, useEffect, useContext } from 'react';
 import axios from 'axios';
 import { motion } from 'framer-motion';
 import { AuthContext } from '../context/AuthContext';
-import { Users, DollarSign, Activity, CreditCard, Edit2, X, Shield } from 'lucide-react';
+import { Users, DollarSign, Activity, CreditCard, Edit2, X, Shield, FileText, CheckCircle, AlertTriangle } from 'lucide-react';
 
 export default function AdminPage() {
   const { token, user } = useContext(AuthContext);
   const [stats, setStats] = useState(null);
   const [usersList, setUsersList] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [activeTab, setActiveTab] = useState('users');
 
   // Edit Modal State
   const [selectedUser, setSelectedUser] = useState(null);
@@ -58,6 +59,16 @@ export default function AdminPage() {
     }
   };
 
+  const handleKycReview = async (userId, status) => {
+    try {
+      await axios.put(`http://localhost:5000/api/admin/kyc/${userId}`, { status });
+      fetchAdminData(); // Refresh to remove user from pending list
+    } catch (err) {
+      console.error('Failed to update KYC status', err);
+      alert('Failed to update KYC status');
+    }
+  };
+
   if (user?.role !== 'Admin') {
     return <div className="card">Access Denied: You must be an Administrator.</div>;
   }
@@ -103,7 +114,29 @@ export default function AdminPage() {
         </div>
       </div>
 
-      {/* Users Table */}
+      {/* Admin Tabs */}
+      <div style={{ display: 'flex', gap: '1rem', marginBottom: '1.5rem', borderBottom: '1px solid var(--color-border)' }}>
+        <button 
+          onClick={() => setActiveTab('users')}
+          style={{ background: 'transparent', border: 'none', padding: '0.75rem 1rem', color: activeTab === 'users' ? 'var(--color-accent)' : 'var(--color-text-muted)', borderBottom: activeTab === 'users' ? '2px solid var(--color-accent)' : '2px solid transparent', cursor: 'pointer', fontWeight: 600 }}
+        >
+          User Directory
+        </button>
+        <button 
+          onClick={() => setActiveTab('kyc')}
+          style={{ background: 'transparent', border: 'none', padding: '0.75rem 1rem', color: activeTab === 'kyc' ? 'var(--color-accent)' : 'var(--color-text-muted)', borderBottom: activeTab === 'kyc' ? '2px solid var(--color-accent)' : '2px solid transparent', cursor: 'pointer', fontWeight: 600, display: 'flex', alignItems: 'center', gap: '0.5rem' }}
+        >
+          KYC Inbox 
+          {usersList.filter(u => u.kycStatus === 'Pending').length > 0 && (
+            <span style={{ background: 'var(--color-danger)', color: 'white', fontSize: '0.75rem', padding: '0.1rem 0.5rem', borderRadius: '1rem' }}>
+              {usersList.filter(u => u.kycStatus === 'Pending').length}
+            </span>
+          )}
+        </button>
+      </div>
+
+      {/* Users Table View */}
+      {activeTab === 'users' && (
       <div className="card">
         <h3 style={{ marginBottom: '1.5rem', borderBottom: '1px solid var(--color-border)', paddingBottom: '1rem' }}>User Directory</h3>
         <div style={{ overflowX: 'auto' }}>
@@ -113,6 +146,7 @@ export default function AdminPage() {
                 <th style={{ padding: '1rem 0' }}>Name</th>
                 <th style={{ padding: '1rem 0' }}>Email</th>
                 <th style={{ padding: '1rem 0' }}>Role</th>
+                <th style={{ padding: '1rem 0' }}>KYC Status</th>
                 <th style={{ padding: '1rem 0' }}>Joined</th>
                 <th style={{ padding: '1rem 0', textAlign: 'right' }}>Actions</th>
               </tr>
@@ -138,6 +172,12 @@ export default function AdminPage() {
                       {u.role}
                     </span>
                   </td>
+                  <td style={{ padding: '1rem 0' }}>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '0.25rem', fontSize: '0.875rem', color: u.kycStatus === 'Verified' ? 'var(--color-success)' : u.kycStatus === 'Pending' ? 'var(--color-accent)' : 'var(--color-text-muted)' }}>
+                      {u.kycStatus === 'Verified' ? <CheckCircle size={14} /> : u.kycStatus === 'Pending' ? <FileText size={14} /> : <AlertTriangle size={14} />}
+                      {u.kycStatus}
+                    </div>
+                  </td>
                   <td style={{ padding: '1rem 0' }}>{new Date(u.createdAt).toLocaleDateString()}</td>
                   <td style={{ padding: '1rem 0', textAlign: 'right' }}>
                     <button 
@@ -153,6 +193,48 @@ export default function AdminPage() {
           </table>
         </div>
       </div>
+      )}
+
+      {/* KYC Inbox View */}
+      {activeTab === 'kyc' && (
+      <div className="card">
+        <h3 style={{ marginBottom: '1.5rem', borderBottom: '1px solid var(--color-border)', paddingBottom: '1rem' }}>Pending KYC Reviews</h3>
+        
+        {usersList.filter(u => u.kycStatus === 'Pending').length === 0 ? (
+          <div style={{ textAlign: 'center', padding: '3rem 0' }}>
+            <Shield size={48} className="text-muted" style={{ margin: '0 auto 1rem' }} />
+            <p className="text-muted">Inbox zero. No pending KYC applications.</p>
+          </div>
+        ) : (
+          <div style={{ display: 'grid', gap: '1.5rem' }}>
+            {usersList.filter(u => u.kycStatus === 'Pending').map(u => (
+              <div key={u._id} style={{ padding: '1.5rem', background: 'rgba(255,255,255,0.02)', border: '1px solid var(--color-border)', borderRadius: '8px' }}>
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '1rem' }}>
+                  <div>
+                    <h4 style={{ margin: '0 0 0.25rem 0' }}>{u.name}</h4>
+                    <p className="text-muted" style={{ margin: 0, fontSize: '0.875rem' }}>{u.email}</p>
+                    <p className="text-muted" style={{ margin: '0.25rem 0 0 0', fontSize: '0.875rem' }}>Joined: {new Date(u.createdAt).toLocaleDateString()}</p>
+                  </div>
+                  <div style={{ display: 'flex', gap: '0.5rem' }}>
+                    <button onClick={() => handleKycReview(u._id, 'Rejected')} style={{ background: 'transparent', border: '1px solid var(--color-danger)', color: 'var(--color-danger)', padding: '0.5rem 1rem', borderRadius: '4px', cursor: 'pointer' }}>Reject</button>
+                    <button onClick={() => handleKycReview(u._id, 'Verified')} style={{ background: 'var(--color-success)', color: '#000', border: 'none', padding: '0.5rem 1rem', borderRadius: '4px', cursor: 'pointer', fontWeight: 600 }}>Approve</button>
+                  </div>
+                </div>
+                
+                <h5 style={{ margin: '0 0 0.5rem 0', color: 'var(--color-text-muted)' }}>Uploaded Documents:</h5>
+                <div style={{ display: 'flex', gap: '1rem', flexWrap: 'wrap' }}>
+                  {u.kycDocuments.map((doc, idx) => (
+                    <a key={idx} href={`http://localhost:5000${doc}`} target="_blank" rel="noreferrer" style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', padding: '0.5rem 1rem', background: 'var(--color-primary-dark)', borderRadius: '4px', color: 'var(--color-accent)', textDecoration: 'none', fontSize: '0.875rem' }}>
+                      <FileText size={16} /> View Document {idx + 1}
+                    </a>
+                  ))}
+                </div>
+              </div>
+            ))}
+          </div>
+        )}
+      </div>
+      )}
 
       {/* Edit User Modal */}
       {selectedUser && (

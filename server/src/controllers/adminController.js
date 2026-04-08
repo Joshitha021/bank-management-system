@@ -64,3 +64,43 @@ exports.updateUser = async (req, res) => {
     res.status(500).json({ success: false, message: 'Server error' });
   }
 };
+
+// Admin Review KYC Documents
+exports.reviewKyc = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const { status } = req.body; // 'Verified' or 'Rejected'
+
+    if (!['Verified', 'Rejected'].includes(status)) {
+      return res.status(400).json({ success: false, message: 'Invalid KYC status designation' });
+    }
+
+    const user = await User.findById(id);
+    if (!user) {
+      return res.status(404).json({ success: false, message: 'User not found' });
+    }
+
+    // Process the documents logic
+    user.kycStatus = status;
+    
+    // Optionally: if rejected, wipe the current documents array so they can re-upload safely
+    if (status === 'Rejected') {
+      user.kycDocuments = [];
+    }
+
+    await user.save();
+    
+    res.status(200).json({ 
+      success: true, 
+      message: `User KYC officially mapped to ${status}`, 
+      user: await User.findById(id).select('-password') 
+    });
+
+  } catch (err) {
+    if (err.kind === 'ObjectId') {
+      return res.status(404).json({ success: false, message: 'User not found' });
+    }
+    console.error('Admin review KYC error:', err.message);
+    res.status(500).json({ success: false, message: 'Server error parsing KYC request' });
+  }
+};

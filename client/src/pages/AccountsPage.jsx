@@ -1,9 +1,12 @@
 import { useState, useEffect } from 'react';
 import axios from 'axios';
 import { motion } from 'framer-motion';
-import { Plus, Wallet, TrendingUp, TrendingDown } from 'lucide-react';
+import { Plus, Wallet, TrendingUp, TrendingDown, ShieldAlert } from 'lucide-react';
+import { AuthContext } from '../context/AuthContext';
+import { useContext } from 'react';
 
 export default function AccountsPage() {
+  const { user } = useContext(AuthContext);
   const [accounts, setAccounts] = useState([]);
   const [loading, setLoading] = useState(true);
 
@@ -44,17 +47,39 @@ export default function AccountsPage() {
           <h1 style={{ fontSize: '1.75rem', marginBottom: '0.25rem' }}>Your Accounts</h1>
           <p className="text-muted">Manage your savings, checking, and deposits.</p>
         </div>
-        <button onClick={createDemoAccount} className="btn-primary" style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+        <button 
+          onClick={createDemoAccount} 
+          className="btn-primary" 
+          disabled={user?.kycStatus !== 'Verified'}
+          style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', opacity: user?.kycStatus !== 'Verified' ? 0.5 : 1, cursor: user?.kycStatus !== 'Verified' ? 'not-allowed' : 'pointer' }}
+        >
           <Plus size={18} /> Open Account
         </button>
       </div>
+
+      {user?.kycStatus !== 'Verified' && (
+        <div style={{ marginBottom: '2rem', padding: '1rem', background: 'rgba(239, 68, 68, 0.1)', borderLeft: '4px solid var(--color-danger)', display: 'flex', alignItems: 'center', gap: '1rem' }}>
+          <ShieldAlert color="var(--color-danger)" />
+          <div>
+            <h4 style={{ margin: 0, color: 'var(--color-danger)' }}>Compliance Action Required</h4>
+            <p style={{ margin: '0.25rem 0 0 0', fontSize: '0.875rem' }}>You must complete Identity Verification (KYC) before you can open new live accounts.</p>
+          </div>
+        </div>
+      )}
 
       {accounts.length === 0 ? (
         <div className="card" style={{ textAlign: 'center', padding: '4rem 2rem' }}>
           <Wallet size={48} className="text-muted" style={{ margin: '0 auto 1rem' }} />
           <h3>No Accounts Found</h3>
           <p className="text-muted" style={{ marginBottom: '1.5rem' }}>You don't have any open accounts yet.</p>
-          <button onClick={createDemoAccount} className="btn-primary">Open your first account</button>
+          <button 
+            onClick={createDemoAccount} 
+            className="btn-primary"
+            disabled={user?.kycStatus !== 'Verified'}
+            style={{ opacity: user?.kycStatus !== 'Verified' ? 0.5 : 1, cursor: user?.kycStatus !== 'Verified' ? 'not-allowed' : 'pointer' }}
+          >
+            Open your first account
+          </button>
         </div>
       ) : (
         <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(320px, 1fr))', gap: '1.5rem' }}>

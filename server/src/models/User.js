@@ -45,7 +45,15 @@ const userSchema = new mongoose.Schema({
     type: String,
     enum: ['User', 'Admin'],
     default: 'User'
-  }
+  },
+  kycStatus: {
+    type: String,
+    enum: ['Unverified', 'Pending', 'Verified', 'Rejected'],
+    default: 'Unverified'
+  },
+  kycDocuments: [{
+    type: String // We'll store the local file path or URL here
+  }]
 }, { timestamps: true });
 
 module.exports = mongoose.model('User', userSchema);

@@ -1,5 +1,5 @@
 import { NavLink, useNavigate } from 'react-router-dom';
-import { Home, CreditCard, Send, FileText, Settings, LogOut, Wallet, LayoutGrid } from 'lucide-react';
+import { Home, CreditCard, Send, FileText, Settings, LogOut, Wallet, LayoutGrid, Shield } from 'lucide-react';
 import { useContext } from 'react';
 import { AuthContext } from '../../context/AuthContext';
 import './Layout.css';
@@ -28,6 +28,7 @@ export default function Sidebar({ isSidebarOpen, setIsSidebarOpen }) {
       { icon: <Send size={20} />, label: 'Transactions', path: '/transactions' },
       { icon: <CreditCard size={20} />, label: 'Cards', path: '/cards' },
       { icon: <FileText size={20} />, label: 'Loans', path: '/loans' },
+      { icon: <Shield size={20} />, label: 'KYC & Compliance', path: '/kyc' },
     ];
   }
 

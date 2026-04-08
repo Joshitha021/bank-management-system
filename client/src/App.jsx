@@ -10,6 +10,7 @@ import TransactionsPage from './pages/TransactionsPage';
 import LoansPage from './pages/LoansPage';
 import SettingsPage from './pages/SettingsPage';
 import AdminPage from './pages/AdminPage';
+import KYCPage from './pages/KYCPage';
 
 function App() {
   return (
@@ -29,6 +30,7 @@ function App() {
             <Route path="loans" element={<LoansPage />} />
             <Route path="settings" element={<SettingsPage />} />
             <Route path="admin" element={<AdminPage />} />
+            <Route path="kyc" element={<KYCPage />} />
             {/* Default fallback inside layout */}
             <Route path="*" element={<Navigate to="/dashboard" replace />} />
           </Route>
