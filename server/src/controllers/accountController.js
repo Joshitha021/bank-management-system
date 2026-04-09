@@ -1,4 +1,5 @@
 const Account = require('../models/Account');
+const Transaction = require('../models/Transaction');
 
 // Get all accounts for logged in user
 exports.getAccounts = async (req, res) => {
@@ -23,6 +24,21 @@ exports.createAccount = async (req, res) => {
     });
 
     await account.save();
+
+    // If there is an initial deposit, formally log it into the centralized transaction ledger
+    if (initialDeposit && Number(initialDeposit) > 0) {
+      const genesisTx = new Transaction({
+        user: req.user.id,
+        account: account._id,
+        type: 'Deposit',
+        amount: Number(initialDeposit),
+        description: 'Account Initialization Deposit',
+        category: 'Income',
+        status: 'Completed'
+      });
+      await genesisTx.save();
+    }
+
     res.status(201).json({ success: true, account });
   } catch (err) {
     console.error(err);
