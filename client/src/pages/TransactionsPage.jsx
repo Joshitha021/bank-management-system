@@ -1,9 +1,11 @@
 import { useState, useEffect } from 'react';
 import axios from 'axios';
 import { motion } from 'framer-motion';
-import { Send, ArrowDownLeft, ArrowUpRight, ShieldAlert } from 'lucide-react';
+import { Send, ArrowDownLeft, ArrowUpRight, ShieldAlert, Download } from 'lucide-react';
 import { AuthContext } from '../context/AuthContext';
 import { useContext } from 'react';
+import { jsPDF } from 'jspdf';
+import autoTable from 'jspdf-autotable';
 
 export default function TransactionsPage() {
   const { user } = useContext(AuthContext);
@@ -118,6 +120,52 @@ export default function TransactionsPage() {
     } catch (err) {
       console.error('Failed to delete payee', err);
     }
+  };
+
+  const exportStatement = () => {
+    if (transactions.length === 0) return;
+    
+    const doc = new jsPDF();
+    
+    // Header
+    doc.setFontSize(22);
+    doc.setTextColor(26, 35, 50); // Navy Blue
+    doc.text('BankHub', 14, 22);
+    
+    doc.setFontSize(12);
+    doc.setTextColor(100, 100, 100);
+    doc.text('Official Account Statement', 14, 30);
+    
+    // User Info
+    doc.setFontSize(10);
+    doc.text(`Account Holder: ${user.name}`, 14, 40);
+    doc.text(`Email: ${user.email}`, 14, 45);
+    doc.text(`Generated On: ${new Date().toLocaleDateString()}`, 14, 50);
+
+    // Filter transactions to map correctly
+    const tableData = transactions.map(tx => [
+      new Date(tx.createdAt).toLocaleDateString(),
+      tx.description,
+      tx.category,
+      tx.amount > 0 ? `+${tx.amount.toFixed(2)}` : tx.amount.toFixed(2),
+      tx.status
+    ]);
+
+    // Generate Table
+    autoTable(doc, {
+      startY: 60,
+      head: [['Date', 'Description', 'Category', 'Amount (INR)', 'Status']],
+      body: tableData,
+      theme: 'striped',
+      headStyles: { fillColor: [26, 35, 50], textColor: [212, 175, 55] }, // Navy Blue header, Gold Text
+      styles: { fontSize: 9 },
+      alternateRowStyles: { fillColor: [248, 249, 250] },
+      columnStyles: {
+        3: { halign: 'right', fontStyle: 'bold' } // Amount column right-aligned
+      }
+    });
+
+    doc.save(`BankHub_Statement_${new Date().toISOString().split('T')[0]}.pdf`);
   };
 
   if (loading) return <div>Loading...</div>;
@@ -285,6 +333,15 @@ export default function TransactionsPage() {
               </div>
             ) : (
               <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
+                <div style={{ display: 'flex', justifyContent: 'flex-end', marginBottom: '0.5rem' }}>
+                  <button 
+                    onClick={exportStatement} 
+                    className="btn-primary" 
+                    style={{ padding: '0.5rem 1rem', fontSize: '0.875rem', display: 'flex', alignItems: 'center', gap: '0.5rem', background: 'var(--color-primary-light)', color: 'var(--color-accent)', border: '1px solid var(--color-border)', boxShadow: 'none' }}
+                  >
+                    <Download size={16} /> Export Statement (PDF)
+                  </button>
+                </div>
                 {transactions.map(tx => (
                   <div key={tx._id} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '1rem', background: 'rgba(255,255,255,0.02)', borderRadius: '8px', border: '1px solid var(--color-border)' }}>
                     <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>

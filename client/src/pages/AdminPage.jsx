@@ -224,7 +224,7 @@ export default function AdminPage() {
                 <h5 style={{ margin: '0 0 0.5rem 0', color: 'var(--color-text-muted)' }}>Uploaded Documents:</h5>
                 <div style={{ display: 'flex', gap: '1rem', flexWrap: 'wrap' }}>
                   {u.kycDocuments.map((doc, idx) => (
-                    <a key={idx} href={`http://localhost:5000${doc}`} target="_blank" rel="noreferrer" style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', padding: '0.5rem 1rem', background: 'var(--color-primary-dark)', borderRadius: '4px', color: 'var(--color-accent)', textDecoration: 'none', fontSize: '0.875rem' }}>
+                    <a key={idx} href={doc.startsWith('http') ? doc : `http://localhost:5000${doc}`} target="_blank" rel="noreferrer" style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', padding: '0.5rem 1rem', background: 'var(--color-primary-dark)', borderRadius: '4px', color: 'var(--color-accent)', textDecoration: 'none', fontSize: '0.875rem' }}>
                       <FileText size={16} /> View Document {idx + 1}
                     </a>
                   ))}

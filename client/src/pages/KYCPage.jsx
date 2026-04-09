@@ -1,8 +1,8 @@
-import React, { useState, useEffect, useContext } from 'react';
+import React, { useState, useEffect, useContext, useRef } from 'react';
 import axios from 'axios';
 import { motion } from 'framer-motion';
 import { AuthContext } from '../context/AuthContext';
-import { UploadCloud, CheckCircle, AlertTriangle, FileText, X } from 'lucide-react';
+import { UploadCloud, CheckCircle, AlertTriangle, FileText, X, Camera } from 'lucide-react';
 
 export default function KYCPage() {
   const { user } = useContext(AuthContext);
@@ -11,6 +11,12 @@ export default function KYCPage() {
   const [uploading, setUploading] = useState(false);
   const [message, setMessage] = useState('');
   const [loading, setLoading] = useState(true);
+
+  // Selfie State
+  const [selfieImage, setSelfieImage] = useState(null);
+  const [isCameraActive, setIsCameraActive] = useState(false);
+  const videoRef = useRef(null);
+  const canvasRef = useRef(null);
 
   useEffect(() => {
     fetchStatus();
@@ -48,6 +54,10 @@ export default function KYCPage() {
       setMessage('Please select at least one document to upload.');
       return;
     }
+    if (!selfieImage) {
+      setMessage('Please capture a live selfie to prove your identity.');
+      return;
+    }
 
     setUploading(true);
     setMessage('');
@@ -65,12 +75,16 @@ export default function KYCPage() {
         })
       );
 
+      // Append Live Selfie
+      base64Files.push({ name: 'Live-Selfie-Verification.jpg', data: selfieImage });
+
       const res = await axios.post('http://localhost:5000/api/kyc/upload', { documents: base64Files }, {
         headers: { 'Content-Type': 'application/json' }
       });
       
       setKycStatus(res.data.kycStatus);
       setFiles([]);
+      setSelfieImage(null);
       setMessage(res.data.message);
     } catch (err) {
       setMessage(err.response?.data?.message || 'Upload failed. Please try again.');
@@ -78,6 +92,44 @@ export default function KYCPage() {
       setUploading(false);
     }
   };
+
+  const startCamera = async () => {
+    try {
+      const stream = await navigator.mediaDevices.getUserMedia({ video: { facingMode: 'user' } });
+      if (videoRef.current) {
+        videoRef.current.srcObject = stream;
+      }
+      setIsCameraActive(true);
+      setMessage('');
+    } catch (err) {
+      setMessage('Camera access denied or unavailable. Please check browser permissions.');
+    }
+  };
+
+  const captureSelfie = () => {
+    if (videoRef.current && canvasRef.current) {
+      const context = canvasRef.current.getContext('2d');
+      // Draw the video frame to the canvas
+      context.drawImage(videoRef.current, 0, 0, 320, 240);
+      const dataUrl = canvasRef.current.toDataURL('image/jpeg');
+      setSelfieImage(dataUrl);
+      stopCamera();
+    }
+  };
+
+  const stopCamera = () => {
+    if (videoRef.current && videoRef.current.srcObject) {
+      videoRef.current.srcObject.getTracks().forEach(track => track.stop());
+    }
+    setIsCameraActive(false);
+  };
+
+  // Cleanup camera on unmount
+  useEffect(() => {
+    return () => {
+      stopCamera();
+    };
+  }, []);
 
   if (loading) return <div>Loading...</div>;
 
@@ -157,9 +209,44 @@ export default function KYCPage() {
               </div>
             )}
 
+            {/* Selfie Section */}
+            {files.length > 0 && (
+              <div style={{ marginBottom: '1.5rem', padding: '1.5rem', background: 'rgba(255,255,255,0.02)', borderRadius: '8px', border: '1px solid var(--color-border)', textAlign: 'center' }}>
+                <h4 style={{ marginBottom: '1rem', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '0.5rem' }}>
+                  <Camera size={20} className="text-muted" /> Step 2: Live Verification Array
+                </h4>
+                
+                {!selfieImage && !isCameraActive && (
+                  <button type="button" onClick={startCamera} className="btn-primary" style={{ background: 'transparent', border: '1px solid var(--color-accent)', color: 'var(--color-text-main)' }}>
+                    Open Camera to Take Selfie
+                  </button>
+                )}
+
+                <div style={{ display: isCameraActive ? 'block' : 'none', position: 'relative', maxWidth: '320px', margin: '0 auto' }}>
+                  <video ref={videoRef} autoPlay playsInline muted style={{ width: '100%', borderRadius: '8px', border: '2px solid var(--color-accent)' }}></video>
+                  <button type="button" onClick={captureSelfie} className="btn-primary" style={{ marginTop: '1rem', width: '100%' }}>
+                    Capture Photo
+                  </button>
+                </div>
+                
+                <canvas ref={canvasRef} width="320" height="240" style={{ display: 'none' }}></canvas>
+
+                {selfieImage && (
+                  <div>
+                    <img src={selfieImage} alt="Selfie" style={{ width: '320px', borderRadius: '8px', border: '2px solid var(--color-success)', marginBottom: '1rem' }} />
+                    <div>
+                      <button type="button" onClick={() => { setSelfieImage(null); startCamera(); }} style={{ background: 'transparent', border: 'none', color: 'var(--color-accent)', cursor: 'pointer' }}>
+                        Retake Selfie
+                      </button>
+                    </div>
+                  </div>
+                )}
+              </div>
+            )}
+
             {message && <div style={{ marginBottom: '1rem', color: message.includes('success') ? 'var(--color-success)' : 'var(--color-danger)' }}>{message}</div>}
 
-            <button type="submit" className="btn-primary" style={{ width: '100%', padding: '1rem' }} disabled={uploading || files.length === 0}>
+            <button type="submit" className="btn-primary" style={{ width: '100%', padding: '1rem', opacity: (!selfieImage || files.length === 0) ? 0.5 : 1 }} disabled={uploading || files.length === 0 || !selfieImage}>
               {uploading ? 'Securely Uploading...' : 'Submit Documents for Verification'}
             </button>
           </form>
