@@ -18,6 +18,12 @@ export default function AccountsPage() {
   const [initialDeposit, setInitialDeposit] = useState('');
   const [accCreating, setAccCreating] = useState(false);
 
+  // Deposit Modal State
+  const [showDepositModal, setShowDepositModal] = useState(false);
+  const [depositAccountId, setDepositAccountId] = useState('');
+  const [depositAmount, setDepositAmount] = useState('');
+  const [isDepositing, setIsDepositing] = useState(false);
+
   useEffect(() => {
     fetchAccounts();
   }, []);
@@ -53,6 +59,26 @@ export default function AccountsPage() {
       alert('Failed to initialize account.');
     } finally {
       setAccCreating(false);
+    }
+  };
+
+  const handleDeposit = async (e) => {
+    e.preventDefault();
+    setIsDepositing(true);
+    try {
+      await axios.post('http://localhost:5000/api/transactions/deposit', {
+        accountId: depositAccountId,
+        amount: Number(depositAmount),
+        description: 'External Transfer (Top-Up)'
+      });
+      fetchAccounts();
+      setShowDepositModal(false);
+      setDepositAmount('');
+    } catch (err) {
+      console.error(err);
+      alert('Deposit failed.');
+    } finally {
+      setIsDepositing(false);
     }
   };
 
@@ -125,11 +151,19 @@ export default function AccountsPage() {
                 </div>
                 <div style={{ background: 'var(--color-primary-light)', padding: '0.25rem 0.75rem', borderRadius: '1rem', fontSize: '0.75rem', height: 'fit-content' }}>{acc.status}</div>
               </div>
-              <div>
-                <p className="text-muted" style={{ fontSize: '0.875rem', marginBottom: '0.25rem' }}>Available Balance</p>
-                <h2 style={{ fontSize: '2rem', marginBottom: '1.5rem' }}>
-                  ₹{acc.balance.toLocaleString('en-US', { minimumFractionDigits: 2 })}
-                </h2>
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-end', marginBottom: '1.5rem' }}>
+                <div>
+                  <p className="text-muted" style={{ fontSize: '0.875rem', marginBottom: '0.25rem' }}>Available Balance</p>
+                  <h2 style={{ fontSize: '2rem', margin: 0 }}>
+                    ₹{acc.balance.toLocaleString('en-US', { minimumFractionDigits: 2 })}
+                  </h2>
+                </div>
+                <button 
+                  onClick={() => { setDepositAccountId(acc._id); setShowDepositModal(true); }}
+                  style={{ background: 'var(--color-primary-light)', border: '1px solid var(--color-border)', color: 'var(--color-text-main)', padding: '0.5rem 1rem', borderRadius: '4px', cursor: 'pointer', fontSize: '0.875rem', display: 'flex', alignItems: 'center', gap: '0.5rem' }}
+                >
+                  <Plus size={16} /> Top Up
+                </button>
               </div>
             </motion.div>
           ))}
@@ -246,6 +280,52 @@ export default function AccountsPage() {
                   </motion.div>
                 </form>
               )}
+            </motion.div>
+          </div>
+        )}
+      </AnimatePresence>
+
+      {/* Top Up Deposit Modal */}
+      <AnimatePresence>
+        {showDepositModal && (
+          <div style={{ position: 'fixed', top: 0, left: 0, right: 0, bottom: 0, background: 'rgba(0,0,0,0.7)', backdropFilter: 'blur(8px)', zIndex: 1000, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+            <motion.div 
+              initial={{ scale: 0.9, opacity: 0 }} 
+              animate={{ scale: 1, opacity: 1 }} 
+              exit={{ scale: 0.9, opacity: 0 }} 
+              className="card" 
+              style={{ width: '100%', maxWidth: '400px', position: 'relative', padding: '2rem' }}
+            >
+              <button 
+                onClick={() => setShowDepositModal(false)} 
+                style={{ position: 'absolute', top: '1.5rem', right: '1.5rem', background: 'transparent', border: 'none', color: 'var(--color-text-muted)', cursor: 'pointer' }}
+              >
+                <X size={20} />
+              </button>
+              
+              <h2 style={{ marginBottom: '0.25rem' }}>Top Up Account</h2>
+              <p className="text-muted" style={{ marginBottom: '2rem', fontSize: '0.875rem' }}>Simulate pulling funds from an external bank.</p>
+
+              <form onSubmit={handleDeposit}>
+                <div className="form-group">
+                  <label>Deposit Amount (₹)</label>
+                  <input 
+                    type="number" 
+                    className="input-field" 
+                    placeholder="Enter amount"
+                    min="1"
+                    value={depositAmount} 
+                    onChange={e => setDepositAmount(e.target.value)} 
+                    required 
+                    style={{ fontSize: '1.25rem', padding: '1rem' }}
+                  />
+                </div>
+                <div style={{ display: 'flex', gap: '1rem', marginTop: '2rem' }}>
+                  <button type="submit" className="btn-primary" style={{ width: '100%' }} disabled={isDepositing}>
+                    {isDepositing ? 'Processing...' : 'Confirm Deposit'}
+                  </button>
+                </div>
+              </form>
             </motion.div>
           </div>
         )}

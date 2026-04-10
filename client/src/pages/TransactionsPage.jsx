@@ -22,6 +22,7 @@ export default function TransactionsPage() {
   const [toAccountLabel, setToAccountLabel] = useState('');
   const [amount, setAmount] = useState('');
   const [desc, setDesc] = useState('');
+  const [category, setCategory] = useState('Transfer');
   const [transferError, setTransferError] = useState('');
   const [transferSuccess, setTransferSuccess] = useState('');
   const [showOtpModal, setShowOtpModal] = useState(false);
@@ -67,7 +68,8 @@ export default function TransactionsPage() {
         fromAccountId: fromAccount,
         toAccountNumber: toAccountLabel,
         amount: Number(amount),
-        description: desc || 'Fund Transfer'
+        description: desc || 'Fund Transfer',
+        category: category
       };
       
       if (showOtpModal) {
@@ -86,6 +88,7 @@ export default function TransactionsPage() {
       setAmount('');
       setToAccountLabel('');
       setDesc('');
+      setCategory('Transfer');
       setShowOtpModal(false);
       setOtp('');
       fetchData(); // refresh list
@@ -266,6 +269,25 @@ export default function TransactionsPage() {
                   disabled={showOtpModal}
                   onChange={e => setDesc(e.target.value)}
                 />
+              </div>
+
+              <div className="form-group">
+                <label>Category</label>
+                <select 
+                  className="input-field"
+                  value={category}
+                  onChange={e => setCategory(e.target.value)}
+                  disabled={showOtpModal}
+                  style={{ appearance: 'none', background: 'var(--color-primary-dark)' }}
+                >
+                  <option value="Transfer">Transfer</option>
+                  <option value="Bills">Bills & Utilities</option>
+                  <option value="Shopping">Shopping</option>
+                  <option value="Food">Food & Dining</option>
+                  <option value="Entertainment">Entertainment</option>
+                  <option value="Travel">Travel</option>
+                  <option value="Other">Other</option>
+                </select>
               </div>
 
               {showOtpModal && (
